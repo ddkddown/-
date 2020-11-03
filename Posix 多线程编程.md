@@ -111,3 +111,148 @@ pthread没有提供绑核接口，但是
 
 - pthread_attr_getstackaddr和pthread_attr_setstackaddr。
 若应用程序需要将线程栈放在内存中的某个特定的区域，可以使用这对调用。
+
+##锁
+######即使多个线程同时尝试获取锁，也只会有一个线程成功，因此，线程需要轮流获取锁。
+
+锁的典型工作流程是:
+1. 创建以及初始化锁变量
+2. 多个线程尝试获取锁
+3. 只有一个线程成功获取锁
+4. 成功获取锁的线程执行临界区任务
+5. 线程释放锁
+6. 其他线程获取锁并进行4,5操作
+7. 最后销毁锁
+
+###初始化锁
+1.  
+```
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+```
+
+2. 
+```
+调用系统调用pthread_mutex_init()
+```
+
+锁初始化后默认是unlock的
+
+###加锁
+1. pthread_mutex_lock() 若未获取锁则阻塞
+2. pthread_mutex_trylock() 若未获取锁不会阻塞，立即返回
+3. pthread_mutex_unlock() 释放锁
+
+当多个线程在等待锁时，如果没有使用线程优先级设定，那么具体哪个线程会获取锁则只能看当前操作系统的调度策略，并且会显得很随机。
+
+##条件变量
+######对条件变量进行等待和发送信号
+
+pthread_cond_wait (condition,mutex)会阻塞当前调用线程直到收到信号发送。
+pthread_cond_signal (condition) 发送信号
+pthread_cond_broadcast (condition) 广播信号
+
+需要注意的几点:
+1. pthread_cond_wait在调用前必须先将mutex加锁，然后在等待时会自动释放mutex
+2. 在收到信号后线程被唤醒时，锁会自动被线程获取加锁，这时需要程序员在使用完后手动释放锁。
+
+(麻烦！)
+
+官网例子:
+```
+#include <pthread.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+
+ #define NUM_THREADS  3
+ #define TCOUNT 10
+ #define COUNT_LIMIT 12
+
+ int     count = 0;
+ int     thread_ids[3] = {0,1,2};
+ pthread_mutex_t count_mutex;
+ pthread_cond_t count_threshold_cv;
+
+ void *inc_count(void *t) 
+ {
+   int i;
+   long my_id = (long)t;
+
+   for (i=0; i<TCOUNT; i++) {
+     pthread_mutex_lock(&count_mutex);
+     count++;
+
+     /* 
+     Check the value of count and signal waiting thread when condition is
+     reached.  Note that this occurs while mutex is locked. 
+     */
+     if (count == COUNT_LIMIT) {
+       pthread_cond_signal(&count_threshold_cv);
+       printf("inc_count(): thread %ld, count = %d  Threshold reached.\n", 
+              my_id, count);
+       }
+     printf("inc_count(): thread %ld, count = %d, unlocking mutex\n", 
+	    my_id, count);
+     pthread_mutex_unlock(&count_mutex);
+
+     /* Do some "work" so threads can alternate on mutex lock */
+     sleep(1);
+     }
+   pthread_exit(NULL);
+ }
+
+ void *watch_count(void *t) 
+ {
+   long my_id = (long)t;
+
+   printf("Starting watch_count(): thread %ld\n", my_id);
+
+   /*
+   Lock mutex and wait for signal.  Note that the pthread_cond_wait 
+   routine will automatically and atomically unlock mutex while it waits. 
+   Also, note that if COUNT_LIMIT is reached before this routine is run by
+   the waiting thread, the loop will be skipped to prevent pthread_cond_wait
+   from never returning. 
+   */
+   pthread_mutex_lock(&count_mutex);
+   while (count<COUNT_LIMIT) {
+     pthread_cond_wait(&count_threshold_cv, &count_mutex);
+     printf("watch_count(): thread %ld Condition signal received.\n", my_id);
+     }
+     count += 125;
+     printf("watch_count(): thread %ld count now = %d.\n", my_id, count);
+   pthread_mutex_unlock(&count_mutex);
+   pthread_exit(NULL);
+ }
+
+ int main (int argc, char *argv[])
+ {
+   int i, rc;
+   long t1=1, t2=2, t3=3;
+   pthread_t threads[3];
+   pthread_attr_t attr;
+
+   /* Initialize mutex and condition variable objects */
+   pthread_mutex_init(&count_mutex, NULL);
+   pthread_cond_init (&count_threshold_cv, NULL);
+
+   /* For portability, explicitly create threads in a joinable state */
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+   pthread_create(&threads[0], &attr, watch_count, (void *)t1);
+   pthread_create(&threads[1], &attr, inc_count, (void *)t2);
+   pthread_create(&threads[2], &attr, inc_count, (void *)t3);
+
+   /* Wait for all threads to complete */
+   for (i=0; i<NUM_THREADS; i++) {
+     pthread_join(threads[i], NULL);
+   }
+   printf ("Main(): Waited on %d  threads. Done.\n", NUM_THREADS);
+
+   /* Clean up and exit */
+   pthread_attr_destroy(&attr);
+   pthread_mutex_destroy(&count_mutex);
+   pthread_cond_destroy(&count_threshold_cv);
+   pthread_exit(NULL);
+
+ }
+```
