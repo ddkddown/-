@@ -1,0 +1,34 @@
+##死锁
+若线程A已经lock了锁1后，想要继续lock锁2，而同时线程B已经lock了锁2，并且也想继续lock锁1。
+此时就造成了死锁问题。
+###解决方法：
+1. 创建统一的加锁方式:如创建一个加锁函数
+```
+bool LockHierarchy() {
+  Lock(mutex_1);
+  Lock(mutex_2);
+}
+```
+
+2. 回滚:若线程A尝试lock锁2失败后，将先释放自己已经拥有的锁
+```
+if(!TryLock(mutex_2)) {
+  UnLock(mutex_1);
+}
+```
+
+##lock chain
+当多线程需要串行进入临界区，且对临界区的不同部分有不同修改时，可以使用lock chain
+```
+void LockChain() {
+  Lock(mutex_1);
+  //do_something
+  UnLock(mutex_1);
+  
+  Lock(mutex_2);
+  //do_something
+  UnLock(mutex_2);
+  
+  ......
+}
+```
