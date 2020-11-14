@@ -32,3 +32,67 @@ void LockChain() {
   ......
 }
 ```
+
+##类对象中包含锁成员的问题
+```
+class test{
+private:
+  mutex m;
+public:
+  void func(){
+    m.lock();
+    ......
+   }
+}
+
+main (){
+  ......
+  test tmp;
+  thread(thread2);
+  ......
+}
+
+thread2 (){
+......
+tmp.func();
+......
+}
+```
+如上述代码所示，若一个test实例同时被两个线程访问，当实例析构时，这个时候锁成员也会被析构，而可能此时在另一个线程内正在执行m.lock()这一步，但同时因为实例已经被析构了，锁成员也不存在了。
+所以，这时在另一个线程里调用m.lock()会造成无法预知的结果，（可能是永远阻塞，也可能是coredump。。。。)
+
+解决方法可以用shared_ptr,因为shared_ptr/weak_ptr的计数在主流平台上是原子操作（仅仅引用计数是线程安全的，但是绑定的对象不是）。
+
+```
+class test{
+public:
+  shared_ptr<Mutex> m = make_shared<...>
+public:
+  void func(){
+    m.lock();
+    ......
+   }
+}
+
+main (){
+  ......
+  test tmp;
+  thread(thread2);
+  ......
+}
+
+thread2 (){
+......
+weak_ptr<Mutex> w = tmp.m;
+if(!w.expired())
+{
+  tmp.func();
+}
+......
+}
+```
+
+
+
+
+
