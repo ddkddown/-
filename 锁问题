@@ -74,6 +74,11 @@ public:
    }
 }
 
+class Observable
+{
+public:
+  weak_ptr<test> w;
+}
 main (){
   ......
   test tmp;
@@ -82,10 +87,13 @@ main (){
 }
 
 thread2 (){
+Observable o;
+o.w = tmp.m;
 ......
 weak_ptr<Mutex> w = tmp.m;
-if(!w.expired())
+if(!w->lock())
 {
+  //tmp没有被析构
   tmp.func();
 }
 ......
