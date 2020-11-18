@@ -3,3 +3,6 @@ Posix线程：https://computing.llnl.gov/tutorials/pthreads/
 并发计算：https://computing.llnl.gov/tutorials/parallel_comp/
 导航页：https://hpc.llnl.gov/training/tutorials
 programming with posix thread (pdf): https://ptgmedia.pearsoncmg.com/images/9780201633924/samplepages/0201633922.pdf
+
+
+######线程是很宝贵的资源，不应在任何线程代码中出现sleep类的函数，sleep类最多在测试代码里出现
