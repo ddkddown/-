@@ -6,3 +6,6 @@ programming with posix thread (pdf): https://ptgmedia.pearsoncmg.com/images/9780
 
 
 ######线程是很宝贵的资源，不应在任何线程代码中出现sleep类的函数，sleep类最多在测试代码里出现
+
+###reactor: non-blocking IO + IO multiplexing
+###proactor: boost.asio
