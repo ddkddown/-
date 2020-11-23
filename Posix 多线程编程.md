@@ -261,3 +261,6 @@ pthread_cond_broadcast (condition) 广播信号
 ##### 1. one loop per thread
 简单来说，就是在线程池中创建固定数量的线程，每个线程跑一个event loop(select, poll, epoll, libevent)，这样就在连接(IO Channel)或者timer到来的时候对线程进行负载调配，也不用频繁创建或者销毁线程。
 其次对于实时性有要求的或者数据量大的任务，可以单独用一个线程的event loop。其次对于IO任务还可以加上non blocking，减少阻塞时间，增加loop利用率。
+
+######缺陷：对于纯CPU计算的任务来说，event loop显得不太适合，event loop反而更适合IO多的任务，纯cpu任务可以采用worker/manager模式。
+######线程池线程也不是越多越好，当线程多了后，会消耗大量时间在时间片上下文切换上，反而显得得不偿失，对于CPU密集任务，线程数最好不超过核数，对于IO多的任务，因为存在线程阻塞挂起的情况。可以线程数稍多些。
