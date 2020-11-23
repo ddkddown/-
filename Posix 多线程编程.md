@@ -256,3 +256,8 @@ pthread_cond_broadcast (condition) 广播信号
 
  }
 ```
+
+####linux多线程编程模型
+##### 1. one loop per thread
+简单来说，就是在线程池中创建固定数量的线程，每个线程跑一个event loop(select, poll, epoll, libevent)，这样就在连接(IO Channel)或者timer到来的时候对线程进行负载调配，也不用频繁创建或者销毁线程。
+其次对于实时性有要求的或者数据量大的任务，可以单独用一个线程的event loop。其次对于IO任务还可以加上non blocking，减少阻塞时间，增加loop利用率。
