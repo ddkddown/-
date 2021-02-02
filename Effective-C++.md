@@ -38,3 +38,5 @@ char *p;
 };
 
 ```
+3. shared_ptr/auto_ptr（以及某些其他智能指针）保存数组是错误的，因为智能指针在析构时只会调用delete而不是delete []
+###### 如果确实需要用到可以考虑boost::scoped_array
