@@ -120,3 +120,5 @@ void PrettyMenu::changeBackground(std::istream &imgSrc) {
 7. inline函数：将每一个调用都用函数本体替换之，这样做可以不必蒙受函数调用导致的额外开销，但是却会增加目标码大小。在一台内存有限的机器上，过度的inline会导致程序体积太大，即便是拥有虚拟内存，也会因为inline造成的代码膨胀导致额外的换页行为，降低指令高速缓存装置的命中率，以及效率损失。
 ###### 如果程序要取某个inline函数的地址，编译器通常必须为该函数生成一个outline函数本体，因为编译器不能将指针指向一个并不存在的函数。
 
+8. public = is-a 意味着适用于base class身上的每一件事情一定也适用于derived class身上。
+   
