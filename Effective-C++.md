@@ -97,3 +97,26 @@ public:
 A *a;
 a->do();
 ```
+
+6. 异常安全性
+- 不泄漏任何资源
+- 不允许数据败坏
+
+此代码块就不满足
+```
+...
+
+void PrettyMenu::changeBackground(std::istream &imgSrc) {
+    lock(&mutex); //当new抛出异常时就不会解锁
+    //可更改为局部变量Lock m1(&mutex), 析构时自动释放锁。
+    delete bgImage;
+    ++imageChanges;//当new抛出异常时,imageChanges也已经被改变
+    //可将累加语句放于new 之后以避免
+    bgImage = new Image(imgSrc);
+    unlock(&mutex);
+}
+...
+```
+7. inline函数：将每一个调用都用函数本体替换之，这样做可以不必蒙受函数调用导致的额外开销，但是却会增加目标码大小。在一台内存有限的机器上，过度的inline会导致程序体积太大，即便是拥有虚拟内存，也会因为inline造成的代码膨胀导致额外的换页行为，降低指令高速缓存装置的命中率，以及效率损失。
+###### 如果程序要取某个inline函数的地址，编译器通常必须为该函数生成一个outline函数本体，因为编译器不能将指针指向一个并不存在的函数。
+
