@@ -53,3 +53,26 @@ db.blog.remove()
 //搜索条件
 db.blog.remove({title:"updating"})
 ```
+### 索引
+```
+// 在username字段上创建索引
+db.users.ensureIndex({"username":1})
+
+// 创建复合索引
+db.users.ensureIndex({"age":1, "username":1})
+
+// 通过explain()查看查询过程信息
+db.users.find({"username":"user101"}).explain()
+
+//IXSCAN 通过索引扫描， COLLSCAN 全表扫描
+
+// 创建唯一索引, dropDups会强制建立唯一索引，遇到重复的值，只会保存第一个，之后的重复文档都会被删除，不推荐使用！
+db.users.ensureIndex({"username:1"}, {"unique":true, "dropDups":true})
+
+// 查看集合上创建的索引
+db.users.getIndexes()
+
+//删除索引
+db.users.dropIndex("userName_1")
+
+```
