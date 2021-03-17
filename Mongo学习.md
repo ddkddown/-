@@ -15,7 +15,10 @@ db.blog.insertMany([{"_id":1},{"_id":2}])
 ```
 // 查找集合中全部文档(最多自动显示20个)
 db.blog.find()
-
+// 查找集合中文档，只返回title(置为1)，且不返回_id(置为0)
+db.blog.find({}, {"title":1, "_id":0})
+// 添加搜索条件, 例子:小于等于30,大于等于18.
+db.blog.find({"age":{"$gte":18, "$lte":30}})
 // 查找单个
 db.blog.findOne()
 ```
