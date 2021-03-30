@@ -93,6 +93,19 @@ db.collectioname.drop()
 //查看集合
 show collections/tables
 ```
+
+- 分页查询
+```
+// 查询所有
+db.collectioname.count()
+// 条件查找
+db.collectioname.count({"userid":1003})
+// 列表查询, skip跳过前10条
+db.collectioname.find().skip(10).limit(10)
+
+//sort查询, 1升序列，-1降序列
+db.collectioname.find().sort("_id":1)
+```
 ### 索引
 ```
 // 在username字段上创建索引
@@ -115,4 +128,9 @@ db.users.getIndexes()
 //删除索引
 db.users.dropIndex("userName_1")
 
+```
+
+- 执行计划
+```
+db.collectioname.find(query,option).explain(options)
 ```
