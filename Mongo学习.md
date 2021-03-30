@@ -10,6 +10,13 @@ db.blog.insert(post)
 
 // 批量插入
 db.blog.insertMany([{"_id":1},{"_id":2}])
+
+// 批量插入时如果某条插入失败，就会终止插入并且不会回滚, 此时可以使用try/catch定位错误插入
+try {
+
+} catch(e) {
+    print(e);
+}
 ```
 - find
 ```
@@ -52,6 +59,39 @@ db.blog.update({"url":"/blog"}, {"$inc":{"date":1}},false, true)
 db.blog.remove()
 //搜索条件
 db.blog.remove({title:"updating"})
+```
+
+- 数据库
+```
+//创建数据库
+use 数据库名 //不存在自动创建。此时数据库存放在内存中，show dbs看不到，只有当插入集合时才持久化到磁盘
+
+//查看所有数据库
+show dbs/databases
+
+//查看当前数据库
+db
+
+//三个默认库
+admin //存放系统用户以及权限文档
+local //存在此库中的文档永远不会被复制
+config //用于分片设置。
+
+// 删除数据库
+db.dropDatabase()
+
+```
+
+- 集合
+```
+//显式创建
+db.createCollection("name")
+//隐式创建
+db.collectionname.insert()
+//删除集合
+db.collectioname.drop()
+//查看集合
+show collections/tables
 ```
 ### 索引
 ```
