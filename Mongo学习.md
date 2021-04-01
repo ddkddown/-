@@ -134,3 +134,24 @@ db.users.dropIndex("userName_1")
 ```
 db.collectioname.find(query,option).explain(options)
 ```
+
+### 分片
+mongodb支持自动分片，用一个mongodb作为路由服务器管理一群mongodb子集，这样对外部应用程序而言，就像是一直在使用单机的mongodb一样。路由服务器知道哪些数据位于哪个分片，可以将请求转发给相应的分片。
+####### 复制是让多台服务器都拥有相同的数据副本，作为镜像存在。分片是拥有不同数据子集。
+
+- 创建集群
+mongo --nodb
+cluster = new ShardingTest({"shards":3, "chunksize":1}), 此时会创建包含3个分片的集群以及一个mongos服务，连接到mongos服务就可以开始使用集群
+db = (new Mongo("localhost:mongos端口")).getDB("数据库名")
+
+- 查看集群状态
+sh.status()
+
+- 对数据库启用分片
+sh.enableSharding("test")
+- 对选定为分片使用的字段建立索引
+db.collectioname.ensureIndex({"字段名":1})
+- 对集合进行分片
+sh.shardCollection("数据库.集合名", {"username":1})
+- 关闭集群
+cluster.stop()
