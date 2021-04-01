@@ -55,4 +55,3 @@ show slave status;
 ```
 
 参考博文：https://www.jianshu.com/p/b0cf461451fb
-
